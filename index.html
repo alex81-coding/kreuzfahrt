@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <title>Title</title>
+</head>
+
+<style>
+    body {
+        padding: 10%;
+        font-size: 15px;
+    }
+    .kreuzfahrt {
+        position: relative;
+        max-width: 800px;
+        margin: auto;
+    }
+    .kreuzfahrt label,
+    .kreuzfahrt input:not([type=checkbox]):not([type=radio]) {
+        width: 100%;
+    }
+    .kreuzfahrt input {
+        margin-bottom: 1rem
+    }
+
+
+    /* DATEPICKER */
+    .ui-datepicker {
+        display: none;
+        background-color: white;
+        border: 1px solid black;
+        padding: 1rem;
+    }
+    .ui-datepicker-next {
+        float: right
+    }
+    .fireworks {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url(assets/images/confetti.gif) no-repeat;
+        background-size: cover;
+    }
+    .in-action {
+        display: block;
+    }
+    .info {
+        width: 200px;
+        height: 200px;
+        margin: auto;
+        background: white;
+        border: 1px solid black;
+        padding: 1rem;
+    }
+
+
+</style>
+
+<body>
+<script src="assets/jquery-3.6.0.js"></script>
+<script src="assets/jquery-ui/jquery-ui.min.js"></script>
+<link rel='stylesheet' href="assets/bootstrap/css/bootstrap.css">
+
+
+<form class="kreuzfahrt container">
+    <fieldset class="row">
+        <div class="col-md-6">
+            <label for="email">
+                Email: <input type="text" name="email" id="email" placeholder="deine E-Mail-Adresse">
+            </label>
+        </div>
+        <div class="col-md-6">
+            <label for="password">
+                Password: <input type="password" name="password" id="password" >
+            </label>
+        </div>
+    </fieldset>
+
+
+    <fieldset class="row vacTime">
+        <div class="col-6">
+            <label for="vacStart">
+                Reisestart: <input class="datepicker" name="vacStart" id="vacStart" placeholder="Start">
+            </label>
+        </div>
+        <div class="col-6">
+            <label for="vacEnd">
+                Reiseende: <input class="datepicker" name="vacEnd" id="vacEnd" placeholder="Ende">
+            </label>
+        </div>
+    </fieldset>
+
+
+    <fieldset class="row w-75">
+        <div class="col-sm-4">
+            <input type="radio" name="gender"> Frau
+        </div>
+        <div class="col-sm-4">
+            <input type="radio" name="gender"> Herr
+        </div>
+        <div class="col-sm-4">
+            <input type="radio" name="gender"> Divers
+        </div>
+    </fieldset>
+
+    <fieldset class="row">
+        <div class="col-12">
+            <input name="firstName" id="firstName" placeholder="Vorname">
+            <input name="lastName" id="lastName" placeholder="Nachname">
+        </div>
+    </fieldset>
+
+    <fieldset class="row">
+        <div class="col-12">
+            <label for="bday">
+                Geburstag: <input class="datepicker" name="bday" id="bday" placeholder="Geburtstag">
+            </label>
+        </div>
+    </fieldset>
+    <div class="fireworks">
+    </div>
+</form>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <button class="btn btn-outline-primary" id="submit">close celebration</button>
+        </div>
+    </div>
+
+
+
+<script>
+
+    $(document).ready(function(){
+
+        $( ".datepicker" ).datepicker({
+            onSelect: function (dateText) {
+                 checkValidDates(dateText);
+              }
+        });
+        $( ".datepicker" ).datepicker( "option", "dateFormat", "yy-mm-dd" )
+    })
+
+    let submitButton = document.getElementById("submit");
+    let vacTimes = $(".vacTime").find("input");
+
+    submitButton.addEventListener("click", function() {
+        $(".fireworks").removeClass("in-action");
+    }, false);
+
+    let vacStart = "";
+    let vacEnd = "";
+    let bday = "";
+    let actualYearsOld;
+
+
+    function checkValidDates(date){
+
+        if($("#vacStart").val() !== "" && $("#vacEnd").val() !== ""){
+            vacStart = new Date($("#vacStart").val());
+            vacEnd = new Date($("#vacEnd").val());
+            
+
+
+            // check if vacation-date is setted
+            if(vacStart.getTime() > vacEnd.getTime()){
+                alert("Die Reisezeit ist ungültig");
+            } else {
+                
+                // check if bday is setted
+                if($("#bday").val().length > 0){
+                    bday = new Date($("#bday").val());
+
+                    // Schaltjahr hat sich bei meinem Code eigentlich erledigt, wenn ich das richtig sehe. 02-29 im Nicht-Schaltjahr
+                    // hat den selben Zeitstempel wie der 03-01. Damit wäre das noch im Zeitraum.
+                    // if(bday.getMonth() + "-" + bday.getDate() == "01-29"){
+                    //     let schaltjahrTest = vacStart.getFullYear();
+                    //     if(schaltjahrTest % 4 == 0 && ( schaltjahrTest % 100 != 0 || schaltjahrTest % 400 == 0)){
+                    //         schaltjahrTest = true;
+                    //     }
+                    // }
+
+                    // set variable for birthday in the actual year
+                    let bdayThisYear = vacStart.getFullYear() + "-" + (bday.getMonth()+1) + "-" + bday.getDate();
+                    bdayThisYear = new Date(bdayThisYear);
+
+                    if(vacStart.getTime() <= bdayThisYear.getTime() && bdayThisYear.getTime() <= vacEnd.getTime()){
+                        console.log("Es gibt eine Geburtstagsparty");
+                        $(".fireworks").addClass("in-action");
+
+                        //how much years old
+                        actualYearsOld = vacStart.getFullYear() - bday.getFullYear();
+                        $(".fireworks").html("<p class=\"info\">You gonna be " + actualYearsOld + " Years old. Lets celebrate it<p>");
+                    } else {
+                        console.log("Es gibt keine Party");
+                        $(".fireworks").removeClass("in-action");
+                        
+                    }
+                }
+            }
+        }
+    }
+    
+</script>
+</body>
+</html>
